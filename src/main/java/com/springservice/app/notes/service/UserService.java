@@ -5,6 +5,7 @@ import com.springservice.app.notes.dto.RoleDto;
 import com.springservice.app.notes.dto.UserManagementDto;
 import com.springservice.app.notes.models.Role;
 import com.springservice.app.notes.models.User;
+import com.springservice.app.notes.repository.NoteRepository;
 import com.springservice.app.notes.repository.RoleRepository;
 import com.springservice.app.notes.repository.UserRepository;
 import com.springservice.app.notes.utility.Mapper;
@@ -19,14 +20,17 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final NoteRepository noteRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       RoleRepository roleRepository) {
+                       RoleRepository roleRepository,
+                       NoteRepository noteRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
+        this.noteRepository = noteRepository;
     }
 
     public void register(User user) {
@@ -74,6 +78,7 @@ public class UserService {
     }
 
     public void deleteUser(String id) {
+        noteRepository.deleteAllByUser_Id(id);
         userRepository.deleteById(id);
     }
 

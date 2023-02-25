@@ -10,5 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NoteRepository extends MongoRepository<Note, String> {
     Page<Note> findAllByUser(User user, PageRequest createdAt);
+
+    void deleteAllByUser_Id(String id);
 }
 

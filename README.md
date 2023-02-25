@@ -7,6 +7,8 @@ You can enter as an administrator with the following credentials:
 - username: admin
 - password: admin
 
+![img.png](img.png)
+
 ## Technologies used
 - Java 17
 - Spring Boot

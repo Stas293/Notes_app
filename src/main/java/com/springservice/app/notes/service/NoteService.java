@@ -29,6 +29,8 @@ public class NoteService {
     }
 
     public Page<NoteDto> getAllNotes(int page, int size) {
+        if (size <= 0) size = 5;
+        if (page < 0) page = 0;
         Page<Note> notes = noteRepository.findAll(PageRequest.of(page, size, Sort.by("createdAt").descending()));
         return Mapper.toPage(notes);
     }
@@ -51,8 +53,7 @@ public class NoteService {
     }
 
     public void delete(String id) {
-        UserDetailsImpl auth = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = auth.user();
+        User user = getUser();
         Note note = noteRepository.findById(id)
                 .orElseThrow(() -> new NotNullableException(ExceptionConstants.NOTE_NOT_FOUND));
         if (note != null && note.getUser().getUsername().equals(user.getUsername())) {
@@ -74,10 +75,7 @@ public class NoteService {
     public Page<NoteDto> getAllNotesByUser(int page, int size) {
         if (size <= 0) size = 5;
         if (page < 0) page = 0;
-        UserDetailsImpl auth = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        User user = auth.user();
+        User user = getUser();
         Page<Note> notes = noteRepository.findAllByUser(
                 user,
                 PageRequest.of(
@@ -88,15 +86,19 @@ public class NoteService {
         return Mapper.toPage(notes);
     }
 
+    private static User getUser() {
+        UserDetailsImpl auth = (UserDetailsImpl) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        return auth.user();
+    }
+
     public Note getNoteById(String id) {
         return noteRepository.findById(id).orElseThrow(() -> new NotNullableException(ExceptionConstants.NOTE_NOT_FOUND));
     }
 
     public void removeLike(Note note) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        User currentUser = userDetails.user();
+        User currentUser = getUser();
         note.getLikes().removeIf(like ->
                 like.getUser()
                         .getUsername()
@@ -107,10 +109,7 @@ public class NoteService {
     public void update(String id, NewNoteDto note) {
         Note noteFromDb = noteRepository.findById(id)
                 .orElseThrow(() -> new NotNullableException(ExceptionConstants.NOTE_NOT_FOUND));
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        User currentUser = userDetails.user();
+        User currentUser = getUser();
         if (!noteFromDb.getUser().getUsername().equals(currentUser.getUsername())) {
             throw new UnauthorizedActionException(ExceptionConstants.NOT_AUTHORIZED);
         }
@@ -119,10 +118,7 @@ public class NoteService {
     }
 
     public Note getNoteForUser(String id) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        User currentUser = userDetails.user();
+        User currentUser = getUser();
         Note note = noteRepository.findById(id)
                 .orElseThrow(() -> new NotNullableException(ExceptionConstants.NOTE_NOT_FOUND));
         if (!note.getUser().getUsername().equals(currentUser.getUsername())) {
