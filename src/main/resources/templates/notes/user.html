@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>My notes</title>
+</head>
+<body>
+<div>
+    <th:block th:include="fragment/navbar"></th:block>
+</div>
+<div class="container-fluid">
+    <h1>My notes</h1>
+    <form th:action="@{/notes}" method="get">
+        <div class="mb-3">
+            <label for="page" class="form-label">Page</label>
+            <input type="number" class="form-control" id="page" min="0" th:field="*{notes.number}">
+        </div>
+        <div class="mb-3">
+            <label for="size" class="form-label">Size</label>
+            <input type="number" class="form-control" id="size" th:min="1" th:max="10" th:field="*{notes.size}">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th>Content</th>
+            <th>Author</th>
+            <th>Created</th>
+            <th>Likes</th>
+            <th:block sec:authorize="isAuthenticated()">
+                <th>Actions</th>
+            </th:block>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="note : ${notes.getContent()}">
+            <td th:text="${note.data}"></td>
+            <td th:text="${note.user.username}"></td>
+            <td th:text="${note.createdAt}"></td>
+            <td th:text="${note.likes}"></td>
+            <th:block sec:authorize="isAuthenticated()">
+                <td>
+                    <form th:method="DELETE" th:action="@{/notes/{id}/delete(id=${note.id})}">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                    <form th:method="GET" th:action="@{/notes/{id}/update(id=${note.id})}">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                </td>
+            </th:block>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
